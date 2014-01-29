@@ -1,24 +1,21 @@
 \documentclass{sig-alternate}
+\usepackage{url}
 
 \begin{document}
 
 \title{State of the art in NoSQL}
 \numberofauthors{4}
 \author{
-% 1st. author
 \alignauthor Christian Beikov\\
        \affaddr{1025760}\\
        \email{christian.beikov@gmail.com}
-% 2nd. author
 \alignauthor Moritz Becker\\
        \affaddr{1026241}\\
        \email{moritz.becker@gmx.at}
-% 3rd. author
 \alignauthor Markus M\"uhlberger\\
        \affaddr{0527677}\\
        \email{mmuehlberger@me.com}
-\and  % use '\and' if you need 'another row' of author names
-% 4th. author
+\and
 \alignauthor Martin Wortschak\\
        \affaddr{0627573}\\
        \email{martin.wortschack@gmail.com}
@@ -27,34 +24,34 @@
 \maketitle
 \begin{abstract}
 
-This paper tries to provide an overview about the scientific state of the art in the area of NoSQL and big data management with special focus on graph databases.
+In the recent years the limitations of relational databases pushed the development of non relational data store technologies, often referred to as NoSQL databases. The main drivers for NoSQL technologies are the need for alternative data models and the capability to handle big data. One of the main problems of traditional relational databases is their inability to handle high amounts of data as well as the inappropriateness of the underlying data model for many applications.
 
-In the recent years the limitations of relational databases pushed the development of non relational data store technologies often referred to as NoSQL databases. Some of the main drivers for NoSQL technologies are the need for alternative data models and the capability to handle big data. One of the main problems of traditional relational databases is their inability to handle high amounts of data and that in most cases they do not fit the needs of todays applications.
+
+This paper provides an overview about the scientific state of the art in the area of NoSQL and big data management with special focus on graph databases. As scalability is one of the main issues of traditional relational database management systems (RDBMS) that is addressed by the NoSQL movement we cover the different approaches that are commonly utilized by NoSQL databases for enabling scalable data stores. Since we consider big data analysis to be an important aspect of the management of big data in general we present Google's MapReduce approach as a tool for processing big data.
 
 \end{abstract}
 
 \section{Introduction}
 
-One of the biggest needs in the area of data storages today is scalability. Since there are physical limits of vertical scaling there will come a point at which horizontal scaling will be the only option left. But horizontal scaling is also interesting in the sense that it can provide several other benefits than only feasibility of handling high amounts of data. Some of these benefits are HA(high availability) and better performance. In addition to that, it is also much cheaper to have multiple low- to mid-end database servers than to have one high-end server.
+Today one of the biggest needs in the area of data storages is scalability. Since vertical scaling is both expensive and physically limited horizontal scaling becomes more and more important especially for low-budget organizations as it allows scaling out by using commodity hardware. Moreover horizontal scaling is interesting in the sense that it can provide several other benefits beyond the feasibility of handling high amounts of data including high availability and better performance. 
 
-Traditional relational databases were not designed for these needs but were adapted to support some kind of horizontal scaling like replication and sharding. There is currently a movement in the relational databases area called NewSQL which tries to tackle this shortcomings by designing systems from scratch with current needs in mind.
+Traditional relational databases were not designed with such requirements in mind but they were adapted to support some kind of horizontal scaling like replication and sharding. Although replication and sharding can help with scaling traditional RDBMS they are still limited by their enforcement of the ACID properties. Currently there is a movement in the area of relational databases called NewSQL which tries to tackle these shortcomings by re-designing systems from scratch with current needs in mind.
 
-TODO: 
+Furthermore most traditional relational databases lack the ability to effeciently handle unstructured or semistructured data like documents, e-mail etc. This inability is mostly related to the fixed schema that a relational table data model requires.
 
-- RDBMS lacked handling of big data, but organizations collect a lot data
-- NoSQL handles unstructured data like documents, e-mail etc. more efficiently
-- NoSQL features summarized: high scalability, reliability, simple data model, simple query language, no or limited data consistency and integrity constraint mechanisms.[pxc3880336.pdf]
-- Include data management info from: http://queue.acm.org/detail.cfm?id=1563874
+On the other hand NoSQL databases tend to provide much simpler data models that have limited or no data consistency and integrity constraint mechanisms at all. This not only allows the usage of unstructured or semistructured data but also to scale in a completely different manner compared to traditional relational databases\cite{clarence:nosql}.
+
+The term big data is not really defined since it strongly depends on the context and on the technological advancements which are totally different today compared with 20 years ago. Therefore we use a meta-definition outlined by Adam Jacobs which roughly says, that big data at any point in time is ``data whose size forces us to look beyond the tried-and-true methods that are prevalent at that time."\cite{jacobs:bigdata}
 
 
 \subsection{Scope of this paper}
 
-In this paper we try to give first a quick overview of the different types of NoSQL databases, the fundamentals they rely on and describe graph databases in more detail. Furthermore we will try to explain how big data can be managed with these databases.
-Due to space limitations we will not go into further detail regarding relational databases and the NewSQL movement.
+In this paper we give a quick overview of the different types of NoSQL databases, the fundamentals they rely on and describe graph databases in more detail. Furthermore we will try to explain how big data can be managed with these databases.
+Due to space limitations we will not go into further detail regarding relational databases and the NewSQL movement. We also know that the classification of Scofield and Popescu\cite{scofield:classification} used by us does not cover all types of databases. However, for the sake of simplicity and  we left out types like object databases.
 
 \section{Classification and comparison}
 
-There are many approaches to categorize database or data storage systems so we chose to just use an existing one instead of defining our own. We tried to adapt the classification of Scofield and Popescu\cite{scofield:classification}.
+There are many approaches to categorize database or data storage systems. Instead of defining our own breakdown we adapt the classification of Scofield and Popescu\cite{scofield:classification} as can be seen in Table 1.
 
 \begin{table}
 \centering
@@ -84,40 +81,84 @@ Relational databases & Oracle\\
 \hline\end{tabular}
 \end{table}
 
-NoSQL systems often sacrafice ACID transactional properties in order to achieve higher performance and scalability. 
-
 \subsection{Key-Value stores}
 
-Key-Value stores are associative data stores that simply store a value for a corresponding key. This kind of data store is very simple and provides very fast access to data. It can handle big amounts of data and supports high concurrency. Values can be chosen arbitrarily and are a black box to the data store. They can only be queried by their key. For further query capabilities search engines like Lucene can be used.
-It is very common for modern Key-Value stores to relax consistency constraints in order to be able to provide better scalability properties.
+Key-Value stores are associative data stores that simply store a value for a corresponding key. This kind of data store is very simple and provides very fast access to data. It can handle big amounts of data and it supports high concurrency. Values can be chosen arbitrarily and are a black box to the data store. They can only be queried by their key. For further query capabilities search engines like Apache Lucene\footnote{lucene.apache.org/} can be used.
+It is very common for modern Key-Value stores to relax consistency constraints in order to be able to provide better scalability properties.\cite{strauch:nosql}
 
-Amazon Dynamo is one of the most influencal NoSQL database categorized as a Key-Value store. It was the first technology to implement the idea of eventual consistency. An idea that resulted in higher availability and scalability. In short, eventual consistency within a cluster does not guarantee up-to-date reads of data, but updates are guaranteed to be propagated to other nodes eventually.
+Amazon Dynamo\footnote{aws.amazon.com/en/dynamodb/} is one of the most influential NoSQL databases categorized as a Key-Value store. It was the first technology to implement the idea of eventual consistency. An idea that resulted in higher availability and scalability. In short, eventual consistency within a cluster does not guarantee up-to-date reads of data, but updates are guaranteed to be propagated to other nodes eventually.
 
-One of the main techniques used to handle big data is consistent hashing. Every key is hashed with MD5 and nodes within the Key-Value store cluster are responsible for a specifc hash range.
+One of the main techniques used to handle big data is consistent hashing. Every key is hashed with MD5 and nodes within the Key-Value store cluster are responsible for a specifc hash range.\cite{strauch:nosql}
 
 \subsection{Column stores}
 
-The origin of column stores are in the analytics and business intelligence area where data is stored and processed by columns instead of rows. For our usage we will broaden this definition to also include row-oriented stores that allow extensible columns as other papers also did[NoSQL Databases.pdf]
+The origin of column stores are in the analytics and business intelligence area where data is stored and processed by columns instead of rows. For our usage we will broaden this definition to also include row-oriented stores that allow extensible columns\cite{strauch:nosql}.
 
-TODO: Cassandra, HBase?
+The most prominent representatives of column stores are the Apache Cassandra\footnote{cassandra.apache.org/} which adopted ideas from both Amazon Dynamo and Google Bigtable\cite{chang2008bigtable} or Apache HBase which was inspired by Google's Bigtable as well.
 
 \subsection{Document stores}
 
 Document stores are very similar to Key-Value stores in the manner that they also store values, in this case called documents, by their values. A very outstanding difference is that the values have a structure. Unlike in relational databases, this structure does not have to conform to a predefined schema. This schemaless approach actually eliminates all schema migration efforts known from the relational database area.
-Actually document stores are not so much concerned about high performance but instead mor on providing a good storage and query performance for big data[pxc3880336.pdf].
+Actually document stores are not so much concerned about high performance but instead mor on providing a good storage and query performance for big data\cite{clarence:nosql}.
 
-TODO: CouchDB, MongoDB?
+For instance, MonogDB\footnote{www.mongodb.com/} is a document store developed by 10gen that stores arbitrary documents in JSON format. It makes heavy use of open web standards like Restful HTTP interfaces, HTTP-Proxies as caches etc.
 
 \subsection{Graph databases}
+The basic motivation behind graph databases is to provide a data model that is closer to the usual algorithmic model behind applications. Thus, this type of databases is especially interesting for modelling and querying relations among entities as needed in the area of social media, for example.
 
-TODO: Neo4j
+The fundamental basics of graph databases are from the mathematical field of graph theory where graphs are defined to be composed of nodes/vertices and directed edges resulting in a directed graph. In contrast to the mathematical model, the graph data model used in graph databases also allow attributes on nodes and edges.
+
+Graph databases not only differ from other data stores due to the different data model used but also because most of them use their own graph oriented storage model instead of tables. Traditional relational databases can be used to store graphs in general but this representation is very inefficient for graph traversals due to the massive amount of joins needed\cite{vicknair:mysql_vs_graphs}. In contrast, graph databases provide an efficient approach for both, the storage and traversal of graphs.
+
+
+\subsubsection{Implementations}
+
+The best known and probably one of the biggest players in the graph database area is Neo4j\footnote{www.neo4j.org}.
+It is a Java-based graph database providing a disk-based, fully transactional persistence engine. It differes from other NoSQL technologies in the sense that it provides ACID properties. It comes with a query language called CQL(cypher Query Language) that is especially designed for graph oriented queries.
+
+\section{Scalability}
+
+This section illustrates the importance of scalability for the success of NoSQL systems and the common approaches that are utilized in order to provide this property.
+
+The major reason for the popularity of NoSQL technologies is the need of organizations, especially startups, for relatively low-cost data stores that allow the management of large and ever increasing amounts of data. While vendors of traditional RDBMS have reacted to this need and extended their products to allow scaling by distribution, these new features are very expensive and complex.
+Therefore one of the biggest selling points of NoSQL technologies is their ability of being horizontally scaleable while maintaining good or even better availability than traditional RDBMS.
+
+\cite{tauro2012comparative} lists three common approaches for scalability in his study of different scalable NoSQL databases:
+\begin{itemize}
+	\item Master slave configuration
+	\item Sharding
+	\item Sharding + eventual consistency
+\end{itemize}
+
+The approach of a master slave configuration works well in environments where you have a small number of updates compared to the number of reads. Updates are performed on the master node which distributes the new data to the slave nodes. Read requests can then be balanced among all nodes.
+
+Whenever scaling of writes is crucial, sharding might be the solution. With this technique a dataset is horizontally split by a function that maps data tuples to different shards. Since each shard can be managed by a separate server this effectively results in a balancing of update requests. However, the drawback of this approach that the whole database has to be shut down when adding a new shard since data in existing shards has to be redistributed.
+
+The disadvantage of pure sharding can be overcome by easing the consistency constraint of the database. It is then possible to shut down only parts of the system when adding new nodes while guaranteeing that the system will eventually converge into a consistent state (i.e. when all redistribution is applied). In practice the relaxed \emph{eventual consistency} turns out to be sufficient for many applications. This approach was first applied in the Amazon's Dynamo DB.
+
+\subsection{Difficutlies in graph databases}
+
+Most of these technologies represent straightforward ways of providing scalability if the underlying data model is rather simple like it is the case for key-value stores, for example.
+
+However when it comes to a graph based models things become more difficult. Although replication might not be such a big deal, the requirements for sharding sound rather conflicting. On the one hand it is important to have related nodes at a single location to be able to provide good traversal performance. Distributing highly connected nodes over different shards can cause big performance problems since many hops between the shards might be required for traversals. On the other hand a single shard should not be heavily loaded which requires data to be distributed efficiently.  One possible solution to this problem is to find a minimum cut for a graph so that there are as few relationships spanning shards as possible. In theory this might sound easy but due to the rapid changes that graphs might undergo during runtime it becomes
+very hard. While this is an ongoing research topic there are mainly two different approaches to tackle this kind of problem so far. One of these approaches is a periodic re-balancing of graphs and another involves domain-specific knowledge to help select appropriate shards for nodes at insertion time\cite{webber:sharding}.
+
+
+\section{Data processing in the context of big data}
+
+As \cite{jacobs:bigdata} lays out, the storage of big data is frequently not the main issue nowadays as disk space is cheap and the databases are generally capable of storing large amounts of data. Problems arise when it comes to querying, processing and aggregating non trivial ranges of data to derive new information which is what big data analysis is all about.
+
+It is not surprising that the big internet companies like Google and Amazon were pioneers in this area since they have the necessary amounts of data available and their business model requires to process this data. In this section the MapReduce programming paradigm introduced by Google is illustrated as it is one of the most important methods for analyzing big data today. Moreover it is publicly available via the open source implementation Apache Hadoop\footnote{hadoop.apache.org/} which makes it interesting also for scientific purposes.
+
+
+The MapReduce approach is derived from functional programming languages like Lisp where a similar concept ist available for applying functions to elements of lists and for aggregation. Many operations that need to be performed on big data are rather simple ones which can be intuitively formalized as map reduce queries. The simplicity of Googles MapReduce approach relies on an abstraction layer that handles distribution and fault-tolerance transparently. This also allows automatic parallelization of queries on clusters. The remaining task for the user is to provide a map function as well as a reduce function that implement the intended calculations\cite{dean2008mapreduce}.
 
 \section{Conclusion}
+In this paper we provided a categorization of NoSQL databases and described approaches for providing scalability and for querying and processing big data.
 
-TODO: NoSQL is emerging domain, one-size(RDBMS) does not fit all -> the right tool for the right job
+NoSQL is still an emerging area that tries to overcome limitations of traditional databases and recent developments seem to be actually capable of replacing relational databases in some areas. Even though relational databases try to fit all needs they are not always the right tool for a task. It has yet to be seen how further advancements will affect the way developers use persistence technologies for their advantages. For many people it is not yet fully understandable how to adopt NoSQL technologies. We believe that the main reason for this is that people don't like to leave their safety zones. As soon as the uncertainty about non-relational databases fades and standards around technologies evolve we are confident that the adoption rate of NoSQL technologies will increase. One of the mentioned emerging standards in the Java world is the Java Data Grid Specification (JSR347).
 
-Predictions: NoSQL will influence how RDBMSs are designed -> see NewSQL
-It takes time until people realize what they want and what they can do with NoSQL systems, but people will definitely be using NoSQL technologies more in the future. Especially because standards are evolving around technologies -> see Java Datagrid specification, Hibernate OGM
+We can already see that the NoSQL movement impacted the world of relational databases in the sense that fundamental concepts are rethought in the NewSQL movement. Although the relational database systems are about to be fully rethought and might provide similar scalability as NoSQL\cite{strauch:nosql}[2.1.2] we still think that polyglot persistence is the future\cite{fowler:polyglot}.
 
 \bibliographystyle{abbrv}
 \bibliography{aic} 
