@@ -1,28 +1,125 @@
-%%This is a very basic article template.
-%%There is just one section and two subsections.
-\documentclass[twocolumn,a4paper]{sig-alternate}
-\usepackage[ngerman,english]{babel}
-\usepackage[utf8]{inputenc}
-
-\title{State of the art in NoSQL and big data management}
-\author{Moritz Becker (1026241) \\ Christian Beikov (1025760) \\ Markus Mühlberger
-(0527677) \\ Martin Wortschack (0627573))}
-\date{\today}
+\documentclass{sig-alternate}
 
 \begin{document}
+
+\title{State of the art in NoSQL}
+\numberofauthors{4}
+\author{
+% 1st. author
+\alignauthor Christian Beikov\\
+       \affaddr{1025760}\\
+       \email{christian.beikov@gmail.com}
+% 2nd. author
+\alignauthor Moritz Becker\\
+       \affaddr{1026241}\\
+       \email{moritz.becker@gmx.at}
+% 3rd. author
+\alignauthor Markus M\"uhlberger\\
+       \affaddr{0527677}\\
+       \email{mmuehlberger@me.com}
+\and  % use '\and' if you need 'another row' of author names
+% 4th. author
+\alignauthor Martin Wortschak\\
+       \affaddr{0627573}\\
+       \email{martin.wortschack@gmail.com}
+}
+
 \maketitle
+\begin{abstract}
 
+This paper tries to provide an overview about the scientific state of the art in the area of NoSQL and big data management with special focus on graph databases.
 
+In the recent years the limitations of relational databases pushed the development of non relational data store technologies often referred to as NoSQL databases. Some of the main drivers for NoSQL technologies are the need for alternative data models and the capability to handle big data. One of the main problems of traditional relational databases is their inability to handle high amounts of data and that in most cases they do not fit the needs of todays applications.
+
+\end{abstract}
 
 \section{Introduction}
 
-\subsection{Subtitle}
+One of the biggest needs in the area of data storages today is scalability. Since there are physical limits of vertical scaling there will come a point at which horizontal scaling will be the only option left. But horizontal scaling is also interesting in the sense that it can provide several other benefits than only feasibility of handling high amounts of data. Some of these benefits are HA(high availability) and better performance. In addition to that, it is also much cheaper to have multiple low- to mid-end database servers than to have one high-end server.
 
-Plain text.
+Traditional relational databases were not designed for these needs but were adapted to support some kind of horizontal scaling like replication and sharding. There is currently a movement in the relational databases area called NewSQL which tries to tackle this shortcomings by designing systems from scratch with current needs in mind.
 
-\subsection{Another subtitle}
+TODO: 
 
-More plain text.
+- RDBMS lacked handling of big data, but organizations collect a lot data
+- NoSQL handles unstructured data like documents, e-mail etc. more efficiently
+- NoSQL features summarized: high scalability, reliability, simple data model, simple query language, no or limited data consistency and integrity constraint mechanisms.[pxc3880336.pdf]
+- Include data management info from: http://queue.acm.org/detail.cfm?id=1563874
 
+
+\subsection{Scope of this paper}
+
+In this paper we try to give first a quick overview of the different types of NoSQL databases, the fundamentals they rely on and describe graph databases in more detail. Furthermore we will try to explain how big data can be managed with these databases.
+Due to space limitations we will not go into further detail regarding relational databases and the NewSQL movement.
+
+\section{Classification and comparison}
+
+There are many approaches to categorize database or data storage systems so we chose to just use an existing one instead of defining our own. We tried to adapt the classification of Scofield and Popescu\cite{scofield:classification}.
+
+\begin{table}
+\centering
+\caption{Categorization of data stores}
+\begin{tabular}{|c|c|} \hline
+Category             & Examples\\
+\hline
+Key-Value stores     & Redis\\ 
+ 					 & Riak\\ 
+ 					 & Coherence\\
+\hline
+Column stores        & Bigtable\\ 
+ 					 & HBase\\ 
+ 					 & Cassandra\\
+\hline
+Document stores      & Mongo\\ 
+ 					 & CouchDB\\ 
+ 					 & Jackrabbit\\
+\hline
+Graph databases      & Neo4j\\ 
+ 					 & OrientDB\\ 
+ 					 & InfiniteGraph\\
+\hline
+Relational databases & Oracle\\ 
+ 					 & DB2\\ 
+ 					 & MySQL\\
+\hline\end{tabular}
+\end{table}
+
+NoSQL systems often sacrafice ACID transactional properties in order to achieve higher performance and scalability. 
+
+\subsection{Key-Value stores}
+
+Key-Value stores are associative data stores that simply store a value for a corresponding key. This kind of data store is very simple and provides very fast access to data. It can handle big amounts of data and supports high concurrency. Values can be chosen arbitrarily and are a black box to the data store. They can only be queried by their key. For further query capabilities search engines like Lucene can be used.
+It is very common for modern Key-Value stores to relax consistency constraints in order to be able to provide better scalability properties.
+
+Amazon Dynamo is one of the most influencal NoSQL database categorized as a Key-Value store. It was the first technology to implement the idea of eventual consistency. An idea that resulted in higher availability and scalability. In short, eventual consistency within a cluster does not guarantee up-to-date reads of data, but updates are guaranteed to be propagated to other nodes eventually.
+
+One of the main techniques used to handle big data is consistent hashing. Every key is hashed with MD5 and nodes within the Key-Value store cluster are responsible for a specifc hash range.
+
+\subsection{Column stores}
+
+The origin of column stores are in the analytics and business intelligence area where data is stored and processed by columns instead of rows. For our usage we will broaden this definition to also include row-oriented stores that allow extensible columns as other papers also did[NoSQL Databases.pdf]
+
+TODO: Cassandra, HBase?
+
+\subsection{Document stores}
+
+Document stores are very similar to Key-Value stores in the manner that they also store values, in this case called documents, by their values. A very outstanding difference is that the values have a structure. Unlike in relational databases, this structure does not have to conform to a predefined schema. This schemaless approach actually eliminates all schema migration efforts known from the relational database area.
+Actually document stores are not so much concerned about high performance but instead mor on providing a good storage and query performance for big data[pxc3880336.pdf].
+
+TODO: CouchDB, MongoDB?
+
+\subsection{Graph databases}
+
+TODO: Neo4j
+
+\section{Conclusion}
+
+TODO: NoSQL is emerging domain, one-size(RDBMS) does not fit all -> the right tool for the right job
+
+Predictions: NoSQL will influence how RDBMSs are designed -> see NewSQL
+It takes time until people realize what they want and what they can do with NoSQL systems, but people will definitely be using NoSQL technologies more in the future. Especially because standards are evolving around technologies -> see Java Datagrid specification, Hibernate OGM
+
+\bibliographystyle{abbrv}
+\bibliography{aic} 
 
 \end{document}
